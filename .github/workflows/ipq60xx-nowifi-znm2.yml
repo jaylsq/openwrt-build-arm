@@ -3,7 +3,8 @@ name: 兆能 M2（无 Wi-Fi）
 on:
   workflow_dispatch:
   schedule:
-    - cron: '15 0 * * 1'
+    # 每周日北京时间 22:15 开始编译，为周一下载预留时间
+    - cron: '15 14 * * 0'
 
 permissions: write-all
 

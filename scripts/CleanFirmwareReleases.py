@@ -16,7 +16,13 @@ repo = os.environ['GITHUB_REPOSITORY']
 pages = json.loads(subprocess.check_output([
     'gh', 'api', '--paginate', '--slurp', f'/repos/{repo}/releases?per_page=100'
 ], text=True))
-groups = {name: [] for name in GROUPS[kind]}
+targets = GROUPS[kind]
+if len(sys.argv) > 2:
+    target = sys.argv[2]
+    if target not in targets:
+        raise SystemExit(f'Unknown firmware target: {target}')
+    targets = (target,)
+groups = {name: [] for name in targets}
 for page in pages:
     for release in page:
         if release.get('draft') or release.get('prerelease') or not release.get('published_at'):
