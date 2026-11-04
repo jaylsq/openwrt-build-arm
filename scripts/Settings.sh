@@ -27,6 +27,15 @@ echo "CONFIG_PACKAGE_luci=y" >> .config
 echo "CONFIG_LUCI_LANG_zh_Hans=y" >> .config
 
 
+# Argon 默认启用必应每日壁纸；保留配置升级时尊重已有选择。
+argon_root=package/luci-theme-argon/root
+sed -i.bak "s/option online_wallpaper 'none'/option online_wallpaper 'bing'/" \
+    "$argon_root/etc/config/argon"
+sed -i.bak 's/^online_wallpaper none$/online_wallpaper bing/' \
+    "$argon_root/etc/uci-defaults/30_luci-theme-argon"
+rm -f "$argon_root/etc/config/argon.bak" "$argon_root/etc/uci-defaults/30_luci-theme-argon.bak"
+
+
 # =========================================================
 # 2. 内核网络优化（UDP/转发优化）
 # =========================================================
