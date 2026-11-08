@@ -125,23 +125,14 @@ jobs:
           cd ./openwrt
           bash "$GITHUB_WORKSPACE/scripts/Settings.sh"
 
-          # 仅亚瑟无 Wi-Fi 构建设置 LAN 地址；兆能 M2 沿用源码默认值。
-          if [ "$TARGET" = "ipq60xx-libWrt-nowifi-ress01" ]; then
-            mkdir -p files/etc/uci-defaults
-            cat > files/etc/uci-defaults/99-custom-lan-ip <<'LAN_IP_DEFAULTS'
-          #!/bin/sh
-          uci set network.lan.ipaddr='192.168.10.1' || exit 1
-          uci commit network || exit 1
-          exit 0
-          LAN_IP_DEFAULTS
-            chmod +x files/etc/uci-defaults/99-custom-lan-ip
-          fi
+          python3 "$GITHUB_WORKSPACE/scripts/PrepareDevice.py" "$PWD" "$TARGET"
 
       - name: Download package
         id: package
         run: |
           cd openwrt
           make defconfig
+          python3 "$GITHUB_WORKSPACE/scripts/ValidateFirmware.py" config "$PWD" "$TARGET"
           make download -j8
 
       - name: Compile the firmware
@@ -159,6 +150,8 @@ jobs:
         if: steps.compile.outputs.status == 'success'  && !cancelled()
         run: |
           cd openwrt/bin/targets/*/*
+
+          python3 "$GITHUB_WORKSPACE/scripts/ValidateFirmware.py" images "$PWD" "$TARGET"
 
           # 给发布文件加时间戳，并同步 profiles.json 的文件引用。
           rm -rf packages
@@ -201,6 +194,8 @@ jobs:
           body: |
             🌐 **【设备默认信息】**
             后台地址：`${{ env.LAN_IP }}`
+            LAN 掩码：255.255.255.0；请连接 LAN 口并重新获取 DHCP 地址。
+            U-Boot 地址独立于系统后台地址；factory 仅适用于匹配该设备及布局的 U-Boot，sysupgrade 用于系统内升级。
             默认密码：无 (留空直接登录)
             Wi-Fi 配置：以设备与源码默认设置为准；nowifi 构建不包含无线功能。
 
