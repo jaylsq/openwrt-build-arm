@@ -6,7 +6,12 @@ on:
     # 每周日北京时间 22:15 自动编译
     - cron: '15 14 * * 0'
 
-permissions: write-all
+permissions:
+  contents: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   build:
@@ -15,6 +20,6 @@ jobs:
     with:
       TARGET: ipq60xx-libWrt-nowifi-ress01
       REPO_SOURCE: LibWrt
-      REPO_URL: https://github.com/LiBwrt/openwrt-6.x
+      REPO_URL: https://github.com/LiBwrt/LibWrt
       REPO_BRANCH: 25.12-nss
       CONFIG_FILE: ./config/arm/nowifi-ress01.config
