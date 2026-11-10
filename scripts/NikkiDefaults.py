@@ -13,7 +13,7 @@ values = {
     ('mixin', 'mixin'): {
         'log_level': 'warning',
         'geodata_loader': 'memconservative',
-        'fake_ip_cache': '0',
+        'fake_ip_cache': '1',
         'api_secret': '123456',
         'ipv6': '1',
         'dns_ipv6': '1',

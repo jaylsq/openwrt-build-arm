@@ -4,7 +4,7 @@
 
 M2 构建不再安装 v2ray-geodata/updater 或额外预置 `/usr/share/v2ray` 数据，保留 Nikki 自己使用的规则库和面板。没有扩大设备分区，也没有删除订阅需要的 Nikki 数据格式。
 
-新安装的 Nikki 使用 warning 日志、memconservative 规则加载、关闭 Fake-IP 映射持久化（重启核心后不保留映射），每分钟检查日志并按上游逻辑清理超过 1MB 的日志。大小限制是周期检查，并非写入硬上限。保留配置升级沿用已有 Nikki 设置；需要在 Nikki 页面手动选择上述选项才能应用到已有配置。不要手动删除运行中的 cache.db、规则库或定时 drop_caches。
+新安装的 Nikki 使用 warning 日志、memconservative 规则加载、保留 Fake-IP 映射持久化（重启核心后继续使用已有映射），每分钟检查日志并按上游逻辑清理超过 1MB 的日志。大小限制是周期检查，并非写入硬上限。保留配置升级沿用已有 Nikki 设置；需要在 Nikki 页面手动选择上述选项才能应用到已有配置。不要手动删除运行中的 cache.db、规则库或定时 drop_caches。
 
 固件首次启动会安装每 10 分钟运行的 `router-health` 任务。`/tmp/router-health/history.log` 和 `history.previous.log` 按 128KiB 阈值轮换（可超出一条采样），只占用内存盘、重启后消失；记录可用内存、overlay/tmp 空间及 inode、连接跟踪计数、核心 RSS/文件描述符和温度，不采集订阅或密码。保留升级时会保留原有 cron 条目，并避免重复添加同一任务。
 
