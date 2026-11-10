@@ -1,0 +1,33 @@
+#!/bin/sh
+# Bounded, private tmpfs history. Never restart services or delete proxy data.
+umask 077
+dir=/tmp/router-health
+mkdir -p "$dir" || exit 1
+# mkdir is atomic; cron and manual collection cannot race log rotation.
+mkdir "$dir/lock" 2>/dev/null || exit 0
+trap 'rmdir "$dir/lock"' EXIT
+trap 'exit 1' HUP INT TERM
+log="$dir/history.log"
+if [ -f "$log" ] && [ "$(wc -c < "$log")" -ge 131072 ]; then
+    mv -f "$log" "$dir/history.previous.log" || exit 1
+fi
+{
+    date '+%Y-%m-%d %H:%M:%S %z'
+    printf 'uptime/load: '; cat /proc/uptime /proc/loadavg
+    grep -E '^(MemTotal|MemAvailable|MemFree|Buffers|Cached|SwapTotal|SwapFree|Slab):' /proc/meminfo
+    df -k /overlay /tmp 2>/dev/null
+    df -i /overlay /tmp 2>/dev/null
+    for name in nf_conntrack_count nf_conntrack_max; do
+        printf '%s: ' "$name"
+        cat "/proc/sys/net/netfilter/$name" 2>/dev/null || echo unavailable
+    done
+    for pid in $(pidof mihomo dnsmasq 2>/dev/null); do
+        grep -E '^(Name|Pid|VmRSS|VmSize|Threads):' "/proc/$pid/status" 2>/dev/null
+        printf 'open_fds: '
+        ls "/proc/$pid/fd" 2>/dev/null | wc -l
+    done
+    for zone in /sys/class/thermal/thermal_zone*/temp; do
+        [ -r "$zone" ] && printf '%s: %s\n' "$zone" "$(cat "$zone")"
+    done
+    echo
+} >> "$log"

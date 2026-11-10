@@ -11,6 +11,9 @@ text = path.read_text(encoding='utf-8')
 values = {
     ('config', 'config'): {'start_delay': '20'},
     ('mixin', 'mixin'): {
+        'log_level': 'warning',
+        'geodata_loader': 'memconservative',
+        'fake_ip_cache': '0',
         'api_secret': '123456',
         'ipv6': '1',
         'dns_ipv6': '1',
@@ -25,6 +28,12 @@ values = {
         'ipv6_proxy': '1',
         'bypass_china_mainland_ip': '1',
         'bypass_china_mainland_ip6': '1',
+    },
+    ('log', 'log'): {
+        'scheduled_clear': '1',
+        'scheduled_clear_cron': '* * * * *',
+        'scheduled_clear_size_limit': '1',
+        'scheduled_clear_size_limit_unit': 'MB',
     },
 }
 

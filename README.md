@@ -1,5 +1,26 @@
 # ARM OpenWrt 云编译
 
+## 长时间运行与 Nikki 排查
+
+M2 构建不再安装 v2ray-geodata/updater 或额外预置 `/usr/share/v2ray` 数据，保留 Nikki 自己使用的规则库和面板。没有扩大设备分区，也没有删除订阅需要的 Nikki 数据格式。
+
+新安装的 Nikki 使用 warning 日志、memconservative 规则加载、关闭 Fake-IP 映射持久化（重启核心后不保留映射），每分钟检查日志并按上游逻辑清理超过 1MB 的日志。大小限制是周期检查，并非写入硬上限。保留配置升级沿用已有 Nikki 设置；需要在 Nikki 页面手动选择上述选项才能应用到已有配置。不要手动删除运行中的 cache.db、规则库或定时 drop_caches。
+
+固件首次启动会安装每 10 分钟运行的 `router-health` 任务。`/tmp/router-health/history.log` 和 `history.previous.log` 按 128KiB 阈值轮换（可超出一条采样），只占用内存盘、重启后消失；记录可用内存、overlay/tmp 空间及 inode、连接跟踪计数、核心 RSS/文件描述符和温度，不采集订阅或密码。保留升级时会保留原有 cron 条目，并避免重复添加同一任务。
+
+再次变慢时先不要重启，通过 SSH 执行并保存输出：
+
+```sh
+router-health
+cat /tmp/router-health/history.previous.log /tmp/router-health/history.log
+du -k /etc/nikki/run /etc/nikki/run/providers /var/log/nikki
+logread | tail -n 100
+dmesg | tail -n 100
+nslookup www.baidu.com 127.0.0.1
+```
+
+首次轮换前 previous 文件不存在属正常。日志可能含访问地址，分享前检查并脱敏。overlay 接近满说明闪存写入空间不足，tmp 满属于内存盘问题；MemAvailable 持续下降并伴随核心 RSS 增长提示核心内存问题；连接跟踪 count 接近 max、OOM、温度异常和 DNS 查询失败需分别处理。现有固件没有现场数据，不能确认本次故障原因；这些改动也不保证消除节点、运营商或上游核心的问题。不会定时重启路由器或代理服务。
+
 此仓库从 [openwrt-build-x86](https://github.com/licong87/openwrt-build-x86) 拆分，使用 LibWrt 25.12-nss 源码编译 IPQ60xx 固件。
 
 在 Actions 中选择所需的独立工作流，点击 Run workflow，只编译选中的配置：
