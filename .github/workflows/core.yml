@@ -106,6 +106,8 @@ jobs:
           python3 -c 'import ast, pathlib, sys; ast.parse(pathlib.Path(sys.argv[1]).read_text())' "$GITHUB_WORKSPACE/scripts/NikkiDefaults.py"
           python3 -c 'import ast, pathlib, sys; ast.parse(pathlib.Path(sys.argv[1]).read_text())' "$GITHUB_WORKSPACE/scripts/ServiceDefaults.py"
           sh -n "$GITHUB_WORKSPACE/files/arm/98-arm-pppoe-ipv6"
+          sh -n "$GITHUB_WORKSPACE/files/arm/router-health"
+          sh -n "$GITHUB_WORKSPACE/files/arm/99-router-health"
 
       - name: Custom Packages
         run: |

@@ -88,6 +88,7 @@ echo "CONFIG_PACKAGE_zoneinfo-asia=y" >> .config
 # =========================================================
 echo "📌 [5/9] 下载规则库..."
 
+if ! grep -qx 'CONFIG_TARGET_DEVICE_qualcommax_ipq60xx_DEVICE_zn_m2=y' .config; then
 mkdir -p files/usr/share/v2ray
 
 download files/usr/share/v2ray/geosite.dat \
@@ -95,6 +96,7 @@ https://fastly.jsdelivr.net/gh/Loyalsoldier/v2ray-rules-dat@release/geosite.dat
 
 download files/usr/share/v2ray/geoip.dat \
 https://fastly.jsdelivr.net/gh/Loyalsoldier/v2ray-rules-dat@release/geoip.dat
+fi
 
 
 mkdir -p files/etc/nikki/run
@@ -148,6 +150,10 @@ customization_root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 mkdir -p files/etc/uci-defaults
 cp "$customization_root/files/arm/98-arm-pppoe-ipv6" files/etc/uci-defaults/98-arm-pppoe-ipv6
 chmod +x files/etc/uci-defaults/98-arm-pppoe-ipv6
+mkdir -p files/usr/sbin
+cp "$customization_root/files/arm/router-health" files/usr/sbin/router-health
+cp "$customization_root/files/arm/99-router-health" files/etc/uci-defaults/99-router-health
+chmod +x files/usr/sbin/router-health files/etc/uci-defaults/99-router-health
 mkdir -p files/etc/zerotier
     touch files/etc/zerotier/.keep
     python3 "$customization_root/scripts/ZeroTierDefaults.py" "$PWD"

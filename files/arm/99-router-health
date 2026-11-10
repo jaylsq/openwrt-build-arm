@@ -1,0 +1,8 @@
+#!/bin/sh
+set -e
+mkdir -p /etc/crontabs
+touch /etc/crontabs/root
+entry='*/10 * * * * /usr/sbin/router-health'
+grep -qxF "$entry" /etc/crontabs/root || printf '%s\n' "$entry" >> /etc/crontabs/root
+# procd starts/reloads cron during boot; no service restart here.
+exit 0
