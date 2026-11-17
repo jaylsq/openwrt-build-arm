@@ -22,3 +22,6 @@ do
       "$libffi_makefile"
   fi
 done
+
+# 兼容上游 Rust LLVM 下载失效与已知 firewall4 补丁上下文变化。
+python3 scripts/BuildCompatibility.py
