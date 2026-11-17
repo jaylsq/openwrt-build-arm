@@ -25,3 +25,6 @@ done
 
 # 兼容上游 Rust LLVM 下载失效与已知 firewall4 补丁上下文变化。
 python3 scripts/BuildCompatibility.py
+
+# 仅复用严格匹配并通过校验的 Rust 工具链安装包。
+python3 scripts/RustToolchainCache.py configure

@@ -26,6 +26,7 @@ env:
   REPO_BRANCH: ${{inputs.REPO_BRANCH}}
   CONFIG_FILE: ${{inputs.CONFIG_FILE}}
   TZ: Asia/Shanghai
+  RUST_DIST_CACHE: /workdir/rust-dist-cache
 
 jobs:
   build:
@@ -131,6 +132,18 @@ jobs:
           make defconfig
           make download -j8
 
+      - name: Compute Rust toolchain cache key
+        id: rust_key
+        run: python3 scripts/RustToolchainCache.py key
+
+      - name: Restore Rust toolchain distributions
+        id: rust_cache
+        continue-on-error: true
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ env.RUST_DIST_CACHE }}
+          key: ${{ steps.rust_key.outputs.key }}
+
       - name: Compile the firmware
         id: compile
         run: |
@@ -140,6 +153,14 @@ jobs:
           echo "status=success" >> $GITHUB_OUTPUT
           echo "DATE=$(date +"%Y-%m-%d %H:%M:%S")" >> $GITHUB_ENV
           echo "FILE_DATE=$(date +"%Y%m%d_%H%M%S")" >> $GITHUB_ENV          
+
+      - name: Save Rust toolchain distributions
+        if: success() && steps.rust_cache.outputs.cache-hit != 'true'
+        continue-on-error: true
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ env.RUST_DIST_CACHE }}
+          key: ${{ steps.rust_key.outputs.key }}
 
       - name: Organize files
         id: organize
