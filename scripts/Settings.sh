@@ -187,3 +187,25 @@ echo "📌 删除 mihomo-alpha（修复循环依赖）..."
 rm -rf package/OpenWrt-nikki/mihomo-alpha
 
 echo "✅ mihomo-alpha 已删除"
+# 仅针对 nowifi-ress01 修改默认后台管理地址为 192.168.10.1（不影响 nowifi-znm2 及 U-Boot 的 192.168.1.1）
+if [ "${TARGET:-}" = "ipq60xx-libWrt-nowifi-ress01" ] || [[ "${CONFIG_FILE:-}" == *"nowifi-ress01"* ]]; then
+  echo "=== [自定义] 修改 nowifi-ress01 默认 LAN 后台地址为 192.168.10.1 ==="
+  OPENWRT_DIR="."
+  if [ -d "openwrt/package/base-files" ]; then
+    OPENWRT_DIR="openwrt"
+  fi
+
+  CFG_GEN="${OPENWRT_DIR}/package/base-files/files/bin/config_generate"
+  if [ -f "$CFG_GEN" ]; then
+    sed -i -E 's/ipad=\$\{ipaddr:-"[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+"\}/ipad=${ipaddr:-"192.168.10.1"}/g' "$CFG_GEN"
+  fi
+
+  mkdir -p "${OPENWRT_DIR}/files/etc/uci-defaults"
+  cat <<'EOF' > "${OPENWRT_DIR}/files/etc/uci-defaults/99-custom-lan-ip"
+#!/bin/sh
+uci set network.lan.ipaddr='192.168.10.1'
+uci commit network
+exit 0
+EOF
+  chmod +x "${OPENWRT_DIR}/files/etc/uci-defaults/99-custom-lan-ip"
+fi
